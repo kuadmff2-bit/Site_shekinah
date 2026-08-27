@@ -4,7 +4,6 @@ import { FormEvent, useMemo, useState } from "react";
 
 type Course = {
   id: string;
-  short: string;
   image: string;
   name: string;
   description: string;
@@ -23,7 +22,6 @@ const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=100093706818098";
 const courses: Course[] = [
   {
     id: "ingles-kids",
-    short: "IK",
     image: "/courses/ingles-kids.webp",
     name: "Inglês Kids",
     description: "Aulas leves e dinâmicas para aprender, praticar e se comunicar com confiança.",
@@ -32,7 +30,6 @@ const courses: Course[] = [
   },
   {
     id: "informatica-completa",
-    short: "IC",
     image: "/courses/informatica-completa.webp",
     name: "Informática Completa",
     description: "Do básico ao essencial para estudar, trabalhar e usar a tecnologia no dia a dia.",
@@ -41,7 +38,6 @@ const courses: Course[] = [
   },
   {
     id: "informatica-avancada",
-    short: "IA",
     image: "/courses/informatica-avancada.webp",
     name: "Informática Avançada",
     description: "Aprofunde seus conhecimentos e vá além nas ferramentas mais importantes.",
@@ -50,7 +46,6 @@ const courses: Course[] = [
   },
   {
     id: "desenho-artistico",
-    short: "DA",
     image: "/courses/desenho-artistico.webp",
     name: "Desenho Artístico",
     description: "Criatividade, técnica e prática para desenvolver o talento artístico.",
@@ -59,7 +54,6 @@ const courses: Course[] = [
   },
   {
     id: "teclado",
-    short: "TK",
     image: "/courses/teclado.webp",
     name: "Teclado",
     description: "Aprenda a tocar e transforme o interesse pela música em habilidade.",
@@ -68,7 +62,6 @@ const courses: Course[] = [
   },
   {
     id: "reforco-escolar",
-    short: "RE",
     image: "/courses/reforco-escolar.webp",
     name: "Reforço Escolar",
     description: "Acompanhamento para alunos do Ensino Fundamental e Médio.",
@@ -77,7 +70,6 @@ const courses: Course[] = [
   },
   {
     id: "gestao-empresarial",
-    short: "GE",
     image: "/courses/gestao-empresarial.webp",
     name: "Gestão Empresarial",
     description: "6 cursos em 1: Secretariado, Operador de Caixa, Telemarketing, Marketing Pessoal, Atendente de Farmácia e Informática.",
@@ -88,11 +80,10 @@ const courses: Course[] = [
   },
   {
     id: "eja",
-    short: "EJA",
     image: "/courses/eja.svg",
     name: "EJA — Educação de Jovens e Adultos",
-    description: "Receba as apostilas, organize seus estudos em casa e conte com orientação durante sua jornada de aprendizagem.",
-    frequency: "Apostilas para estudar em casa",
+    description: "Você recebe as apostilas para estudar em casa e, todo fim de semana, vem à nossa instituição fazer uma prova relacionada ao conteúdo da apostila estudada.",
+    frequency: "Prova presencial todo fim de semana",
     price: "Fale com a secretaria",
     priceLabel: "Como participar",
     badge: "Estude em casa",
@@ -200,7 +191,7 @@ export default function Home() {
       `*Nome completo:* ${data.get("nome")}`,
       `*Data de nascimento:* ${data.get("nascimento")}`,
       `*CPF:* ${data.get("cpf")}`,
-      `*RG:* ${data.get("rg")}`,
+      `*RG ou nova identidade (CIN):* ${data.get("rg")}`,
       `*Telefone principal:* ${data.get("whatsapp")}`,
       `*Segundo telefone:* ${data.get("telefone2") || "Não informado"}`,
       `*Endereço:* ${data.get("endereco")}`,
@@ -224,7 +215,7 @@ export default function Home() {
     "Olá! Vi o site do Centro de Ensino Shekinah e gostaria de tirar uma dúvida sobre os cursos.",
   );
   const ejaMessage = encodeURIComponent(
-    "Olá! Vi as informações do EJA no site do Centro de Ensino Shekinah. Gostaria de saber como funciona, receber as apostilas e acertar os detalhes com a secretaria.",
+    "Olá! Vi as informações do EJA no site do Centro de Ensino Shekinah. Gostaria de saber como funciona o estudo pelas apostilas em casa e as provas presenciais de todo fim de semana.",
   );
 
   return (
@@ -291,10 +282,11 @@ export default function Home() {
               <div className="course-image-wrap">
                 <img src={course.image} alt={`Imagem representando o curso ${course.name}`} />
               </div>
-              <div className="course-topline">
-                <span className="course-icon" aria-hidden="true">{course.short}</span>
-                {course.badge && <span className="course-badge">{course.badge}</span>}
-              </div>
+              {course.badge && (
+                <div className="course-topline">
+                  <span className="course-badge">{course.badge}</span>
+                </div>
+              )}
               <h3>{course.name}</h3>
               <p>{course.description}</p>
               <div className="course-meta">
@@ -362,7 +354,11 @@ export default function Home() {
             <label className="field full"><span>Nome completo *</span><input name="nome" type="text" autoComplete="name" required placeholder="Digite seu nome completo" /></label>
             <label className="field"><span>Data de nascimento *</span><input name="nascimento" type="date" required value={birthDate} onChange={(event) => setBirthDate(event.target.value)} /></label>
             <label className="field"><span>CPF *</span><input name="cpf" type="text" inputMode="numeric" required placeholder="000.000.000-00" /></label>
-            <label className="field"><span>RG *</span><input name="rg" type="text" inputMode="numeric" required placeholder="Digite o número do RG" /></label>
+            <label className="field">
+              <span>RG ou nova Carteira de Identidade Nacional (CIN) *</span>
+              <input name="rg" type="text" inputMode="numeric" required placeholder="RG antigo ou o mesmo número do CPF" />
+              <small className="field-hint">Na nova identidade, o número informado pode ser o mesmo do CPF.</small>
+            </label>
             <label className="field"><span>Telefone principal *</span><input name="whatsapp" type="tel" autoComplete="tel" required placeholder="(92) 99999-9999" /></label>
             <label className="field"><span>Segundo telefone (opcional)</span><input name="telefone2" type="tel" placeholder="(92) 99999-9999" /></label>
             <label className="field full"><span>Endereço completo *</span><input name="endereco" type="text" autoComplete="street-address" required placeholder="Rua, número, bairro ou comunidade" /></label>
