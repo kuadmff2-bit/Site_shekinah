@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 
 type Course = {
   id: string;
@@ -114,15 +114,39 @@ function scrollToForm() {
   document.getElementById("matricula")?.scrollIntoView({ behavior: "smooth" });
 }
 
+function formatBirthDate(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+function parseBirthDate(value: string) {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!match) return null;
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const date = new Date(year, month - 1, day, 12, 0, 0);
+  const isValidDate =
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day &&
+    date <= new Date();
+
+  return isValidDate ? date : null;
+}
+
 export default function Home() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [formError, setFormError] = useState("");
   const [birthDate, setBirthDate] = useState("");
 
   const isMinor = useMemo(() => {
-    if (!birthDate) return false;
+    const born = parseBirthDate(birthDate);
+    if (!born) return false;
     const today = new Date();
-    const born = new Date(`${birthDate}T12:00:00`);
     let age = today.getFullYear() - born.getFullYear();
     const birthdayHasNotPassed =
       today.getMonth() < born.getMonth() ||
@@ -130,6 +154,16 @@ export default function Home() {
     if (birthdayHasNotPassed) age -= 1;
     return age < 18;
   }, [birthDate]);
+
+  function handleBirthDateChange(event: ChangeEvent<HTMLInputElement>) {
+    const formattedDate = formatBirthDate(event.target.value);
+    event.target.setCustomValidity(
+      formattedDate.length === 10 && !parseBirthDate(formattedDate)
+        ? "Digite uma data de nascimento válida no formato DD/MM/AAAA."
+        : "",
+    );
+    setBirthDate(formattedDate);
+  }
 
   const selectedNames = useMemo(
     () => courses.filter((course) => selectedCourses.includes(course.id)).map((course) => course.name),
@@ -352,7 +386,23 @@ export default function Home() {
           <div className="form-heading"><span>Formulário de interesse</span><p>Campos com * são obrigatórios.</p></div>
           <div className="field-grid">
             <label className="field full"><span>Nome completo *</span><input name="nome" type="text" autoComplete="name" required placeholder="Digite seu nome completo" /></label>
-            <label className="field"><span>Data de nascimento *</span><input name="nascimento" type="date" required value={birthDate} onChange={(event) => setBirthDate(event.target.value)} /></label>
+            <label className="field">
+              <span>Data de nascimento *</span>
+              <input
+                name="nascimento"
+                type="text"
+                inputMode="numeric"
+                autoComplete="bday"
+                required
+                maxLength={10}
+                pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
+                title="Digite a data no formato DD/MM/AAAA"
+                placeholder="DD/MM/AAAA"
+                value={birthDate}
+                onChange={handleBirthDateChange}
+              />
+              <small className="field-hint">Digite o dia, o mês e o ano. As barras aparecem automaticamente.</small>
+            </label>
             <label className="field"><span>CPF *</span><input name="cpf" type="text" inputMode="numeric" required placeholder="000.000.000-00" /></label>
             <label className="field">
               <span>RG ou nova Carteira de Identidade Nacional (CIN) *</span>

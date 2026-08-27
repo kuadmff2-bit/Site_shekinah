@@ -33,6 +33,11 @@ test("renders the Shekinah page with EJA and official social links", async () =>
   assert.match(html, /prova presencial todo fim de semana/i);
   assert.match(html, /RG ou nova Carteira de Identidade Nacional \(CIN\)/i);
   assert.match(html, /mesmo número do CPF/i);
+  const birthDateInput = html.match(/<input[^>]*name="nascimento"[^>]*>/i)?.[0];
+  assert.ok(birthDateInput, "campo de data de nascimento não encontrado");
+  assert.match(birthDateInput, /type="text"/i);
+  assert.match(birthDateInput, /placeholder="DD\/MM\/AAAA"/i);
+  assert.doesNotMatch(birthDateInput, /type="date"/i);
   assert.doesNotMatch(html, /class="course-icon"/i);
   assert.match(html, /instagram\.com\/centro_de_ensino_shekinah/i);
   assert.match(html, /facebook\.com\/profile\.php\?id=100093706818098/i);
