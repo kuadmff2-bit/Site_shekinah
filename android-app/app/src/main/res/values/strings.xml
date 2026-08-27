@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Shekinah</string>
+    <string name="app_name_uppercase">SHEKINAH</string>
+    <string name="app_subtitle">Centro de Ensino</string>
+    <string name="connection_title">Não foi possível abrir o site</string>
+    <string name="connection_error">Verifique sua internet e tente novamente.</string>
+    <string name="connection_error_detail">Verifique sua internet e tente novamente.\n\n%1$s</string>
+    <string name="try_again">Tentar novamente</string>
+    <string name="no_app_available">Nenhum aplicativo disponível para abrir este link.</string>
+</resources>
