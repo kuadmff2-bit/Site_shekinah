@@ -10,7 +10,7 @@ on:
       - ".github/workflows/gerar-apk.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   gerar-apk:
@@ -46,3 +46,16 @@ jobs:
           path: Shekinah.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publicar link permanente do APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view aplicativo-shekinah >/dev/null 2>&1; then
+            gh release upload aplicativo-shekinah Shekinah.apk --clobber
+          else
+            gh release create aplicativo-shekinah Shekinah.apk \
+              --target "$GITHUB_SHA" \
+              --title "Aplicativo Shekinah" \
+              --notes "APK oficial do Centro de Ensino Shekinah para instalação em celulares Android."
+          fi
