@@ -1,0 +1,418 @@
+"use client";
+
+import { FormEvent, useMemo, useState } from "react";
+
+type Course = {
+  id: string;
+  short: string;
+  image: string;
+  name: string;
+  description: string;
+  frequency: string;
+  price: string;
+  priceLabel?: string;
+  badge?: string;
+  featured?: boolean;
+  contactOnly?: boolean;
+};
+
+const WHATSAPP_NUMBER = "5592993977312";
+const INSTAGRAM_URL = "https://www.instagram.com/centro_de_ensino_shekinah/";
+const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=100093706818098";
+
+const courses: Course[] = [
+  {
+    id: "ingles-kids",
+    short: "IK",
+    image: "/courses/ingles-kids.webp",
+    name: "Inglês Kids",
+    description: "Aulas leves e dinâmicas para aprender, praticar e se comunicar com confiança.",
+    frequency: "2 vezes por semana",
+    price: "R$ 150/mês",
+  },
+  {
+    id: "informatica-completa",
+    short: "IC",
+    image: "/courses/informatica-completa.webp",
+    name: "Informática Completa",
+    description: "Do básico ao essencial para estudar, trabalhar e usar a tecnologia no dia a dia.",
+    frequency: "2 vezes por semana",
+    price: "R$ 150/mês",
+  },
+  {
+    id: "informatica-avancada",
+    short: "IA",
+    image: "/courses/informatica-avancada.webp",
+    name: "Informática Avançada",
+    description: "Aprofunde seus conhecimentos e vá além nas ferramentas mais importantes.",
+    frequency: "2 vezes por semana",
+    price: "R$ 150/mês",
+  },
+  {
+    id: "desenho-artistico",
+    short: "DA",
+    image: "/courses/desenho-artistico.webp",
+    name: "Desenho Artístico",
+    description: "Criatividade, técnica e prática para desenvolver o talento artístico.",
+    frequency: "Aulas aos sábados",
+    price: "R$ 150/mês",
+  },
+  {
+    id: "teclado",
+    short: "TK",
+    image: "/courses/teclado.webp",
+    name: "Teclado",
+    description: "Aprenda a tocar e transforme o interesse pela música em habilidade.",
+    frequency: "2 vezes por semana",
+    price: "R$ 150/mês",
+  },
+  {
+    id: "reforco-escolar",
+    short: "RE",
+    image: "/courses/reforco-escolar.webp",
+    name: "Reforço Escolar",
+    description: "Acompanhamento para alunos do Ensino Fundamental e Médio.",
+    frequency: "2 vezes por semana",
+    price: "R$ 150/mês",
+  },
+  {
+    id: "gestao-empresarial",
+    short: "GE",
+    image: "/courses/gestao-empresarial.webp",
+    name: "Gestão Empresarial",
+    description: "6 cursos em 1: Secretariado, Operador de Caixa, Telemarketing, Marketing Pessoal, Atendente de Farmácia e Informática.",
+    frequency: "3 vezes por semana",
+    price: "R$ 180/mês",
+    badge: "6 cursos em 1",
+    featured: true,
+  },
+  {
+    id: "eja",
+    short: "EJA",
+    image: "/courses/eja.svg",
+    name: "EJA — Educação de Jovens e Adultos",
+    description: "Receba as apostilas, organize seus estudos em casa e conte com orientação durante sua jornada de aprendizagem.",
+    frequency: "Apostilas para estudar em casa",
+    price: "Fale com a secretaria",
+    priceLabel: "Como participar",
+    badge: "Estude em casa",
+    featured: true,
+    contactOnly: true,
+  },
+];
+
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4.2" />
+      <circle className="social-icon-dot" cx="17.4" cy="6.7" r="1" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M14.4 21v-7h2.5l.4-3h-2.9V9.1c0-.9.3-1.5 1.5-1.5h1.6V4.9c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 4.1V11H8.5v3h2.6v7h3.3Z" />
+    </svg>
+  );
+}
+
+function scrollToForm() {
+  document.getElementById("matricula")?.scrollIntoView({ behavior: "smooth" });
+}
+
+export default function Home() {
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [formError, setFormError] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+
+  const isMinor = useMemo(() => {
+    if (!birthDate) return false;
+    const today = new Date();
+    const born = new Date(`${birthDate}T12:00:00`);
+    let age = today.getFullYear() - born.getFullYear();
+    const birthdayHasNotPassed =
+      today.getMonth() < born.getMonth() ||
+      (today.getMonth() === born.getMonth() && today.getDate() < born.getDate());
+    if (birthdayHasNotPassed) age -= 1;
+    return age < 18;
+  }, [birthDate]);
+
+  const selectedNames = useMemo(
+    () => courses.filter((course) => selectedCourses.includes(course.id)).map((course) => course.name),
+    [selectedCourses],
+  );
+
+  const priceSummary = useMemo(() => {
+    if (selectedCourses.includes("gestao-empresarial")) return "R$ 180 por mês";
+    if (selectedCourses.length === 3) return "Combo com 3 cursos: R$ 280 por mês";
+    if (selectedCourses.length === 2) return "Combo: R$ 180 por mês";
+    if (selectedCourses.length === 1) return "R$ 150 por mês";
+    return "Escolha um curso ou monte seu combo";
+  }, [selectedCourses]);
+
+  function toggleCourse(courseId: string) {
+    setFormError("");
+
+    if (courseId === "gestao-empresarial") {
+      setSelectedCourses((current) => current.includes(courseId) ? [] : [courseId]);
+      return;
+    }
+
+    if (!selectedCourses.includes(courseId) && selectedCourses.filter((id) => id !== "gestao-empresarial").length >= 3) {
+      setFormError("Você pode escolher no máximo três cursos para o combo.");
+      return;
+    }
+
+    setSelectedCourses((current) => {
+      const withoutManagement = current.filter((id) => id !== "gestao-empresarial");
+      if (withoutManagement.includes(courseId)) {
+        return withoutManagement.filter((id) => id !== courseId);
+      }
+      if (withoutManagement.length >= 3) return withoutManagement;
+      return [...withoutManagement, courseId];
+    });
+  }
+
+  function chooseCourse(courseId: string) {
+    setSelectedCourses([courseId]);
+    scrollToForm();
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (selectedCourses.length === 0) {
+      setFormError("Escolha pelo menos um curso para continuar.");
+      document.getElementById("course-options")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    const form = event.currentTarget;
+    if (!form.reportValidity()) return;
+
+    const data = new FormData(form);
+    const message = [
+      "*NOVA PRÉ-MATRÍCULA — SHEKINAH*",
+      "",
+      `*Nome completo:* ${data.get("nome")}`,
+      `*Data de nascimento:* ${data.get("nascimento")}`,
+      `*CPF:* ${data.get("cpf")}`,
+      `*RG:* ${data.get("rg")}`,
+      `*Telefone principal:* ${data.get("whatsapp")}`,
+      `*Segundo telefone:* ${data.get("telefone2") || "Não informado"}`,
+      `*Endereço:* ${data.get("endereco")}`,
+      `*Curso(s):* ${selectedNames.join(" + ")}`,
+      `*Plano:* ${priceSummary}`,
+      ...(isMinor
+        ? [
+            "*Aluno menor de 18 anos:* Sim",
+            `*CPF do pai:* ${data.get("cpfPai")}`,
+            `*CPF da mãe:* ${data.get("cpfMae")}`,
+          ]
+        : ["*Aluno menor de 18 anos:* Não"]),
+      "",
+      "Li as informações e desejo confirmar minha matrícula com a secretaria.",
+    ].join("\n");
+
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  }
+
+  const doubtMessage = encodeURIComponent(
+    "Olá! Vi o site do Centro de Ensino Shekinah e gostaria de tirar uma dúvida sobre os cursos.",
+  );
+  const ejaMessage = encodeURIComponent(
+    "Olá! Vi as informações do EJA no site do Centro de Ensino Shekinah. Gostaria de saber como funciona, receber as apostilas e acertar os detalhes com a secretaria.",
+  );
+
+  return (
+    <main>
+      <div className="announcement"><span>✦</span> Matrículas abertas • início imediato <span>✦</span></div>
+
+      <header className="site-header">
+        <a className="brand" href="#inicio" aria-label="Centro de Ensino Shekinah - início">
+          <span className="brand-mark" aria-hidden="true">S</span>
+          <span><strong>Shekinah</strong><small>Centro de Ensino</small></span>
+        </a>
+        <nav aria-label="Navegação principal">
+          <a href="#cursos">Cursos</a>
+          <a href="#combo">Combo</a>
+          <a href="#como-funciona">Como funciona</a>
+          <a className="nav-cta" href="#matricula">Quero me matricular</a>
+        </nav>
+      </header>
+
+      <section className="hero" id="inicio">
+        <div className="hero-glow hero-glow-one" />
+        <div className="hero-glow hero-glow-two" />
+        <div className="hero-content">
+          <div className="hero-copy">
+            <p className="eyebrow">Conhecimento hoje, conquistas para sempre</p>
+            <h1>O próximo passo do seu futuro começa aqui.</h1>
+            <p className="hero-text">Cursos presenciais, professores qualificados e aprendizado prático para você desenvolver novas habilidades.</p>
+            <div className="hero-actions">
+              <button className="button button-gold" type="button" onClick={scrollToForm}>Fazer pré-matrícula</button>
+              <a className="button button-outline" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${doubtMessage}`} target="_blank" rel="noreferrer">Falar com a secretaria</a>
+            </div>
+            <div className="hero-trust" aria-label="Diferenciais">
+              <span>✓ Aulas presenciais</span><span>✓ Certificado</span><span>✓ Início imediato</span>
+            </div>
+          </div>
+
+          <aside className="hero-card" aria-label="Condições de matrícula">
+            <p className="hero-card-label">Invista no seu futuro</p>
+            <div className="enrollment-price"><span>Matrícula</span><strong>R$ 49,90</strong></div>
+            <div className="hero-divider" />
+            <div className="hero-price-row"><span>Cursos individuais</span><strong>R$ 150/mês</strong></div>
+            <div className="hero-price-row featured-row"><span>Combo com 2 cursos</span><strong>R$ 180/mês</strong></div>
+            <div className="hero-price-row featured-row"><span>Combo com 3 cursos</span><strong>R$ 280/mês</strong></div>
+            <p className="hero-card-note">Escolha dois ou três cursos participantes e aproveite o valor especial.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="benefits" aria-label="Vantagens">
+        <div><span>01</span><strong>Aulas presenciais</strong><small>Aprendizado com acompanhamento</small></div>
+        <div><span>02</span><strong>Professores qualificados</strong><small>Orientação em cada etapa</small></div>
+        <div><span>03</span><strong>Certificado reconhecido</strong><small>Valorize seu currículo</small></div>
+        <div><span>04</span><strong>Horários acessíveis</strong><small>Escolha o melhor turno</small></div>
+      </section>
+
+      <section className="section courses-section" id="cursos">
+        <div className="section-heading">
+          <div><p className="eyebrow dark">Cursos Shekinah</p><h2>Escolha o que combina com você</h2></div>
+          <p>Formações práticas para todas as idades, com acompanhamento presencial e condições que cabem no seu bolso.</p>
+        </div>
+        <div className="course-grid">
+          {courses.map((course) => (
+            <article className={`course-card${course.featured ? " featured-course" : ""}`} key={course.id}>
+              <div className="course-image-wrap">
+                <img src={course.image} alt={`Imagem representando o curso ${course.name}`} />
+              </div>
+              <div className="course-topline">
+                <span className="course-icon" aria-hidden="true">{course.short}</span>
+                {course.badge && <span className="course-badge">{course.badge}</span>}
+              </div>
+              <h3>{course.name}</h3>
+              <p>{course.description}</p>
+              <div className="course-meta">
+                <span><small>Frequência</small>{course.frequency}</span>
+                <span><small>{course.priceLabel ?? "Mensalidade"}</small>{course.price}</span>
+              </div>
+              {course.contactOnly ? (
+                <a className="course-contact-link" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${ejaMessage}`} target="_blank" rel="noreferrer">
+                  Conversar sobre o EJA
+                </a>
+              ) : (
+                <button type="button" onClick={() => chooseCourse(course.id)}>Tenho interesse</button>
+              )}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="combo-section" id="combo">
+        <div className="combo-content">
+          <div>
+            <p className="eyebrow">Combo Shekinah</p>
+            <h2>Mais cursos.<br />Mais oportunidades.</h2>
+            <p>Escolha <strong>2 cursos por R$ 180</strong> ou <strong>3 cursos por R$ 280</strong> por mês. É mais aprendizado por um valor especial.</p>
+            <button className="button button-gold" type="button" onClick={scrollToForm}>Montar meu combo</button>
+          </div>
+          <div className="combo-example combo-choice-list" aria-label="Valores dos combos">
+            <div className="combo-total"><small>Combo com 2 cursos</small><strong>R$ 180</strong><span>por mês</span></div>
+            <b>ou</b>
+            <div className="combo-total"><small>Combo com 3 cursos</small><strong>R$ 280</strong><span>por mês</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section steps-section" id="como-funciona">
+        <div className="section-heading centered"><p className="eyebrow dark">Simples e rápido</p><h2>Sua matrícula em três passos</h2></div>
+        <div className="steps-grid">
+          <article><span>1</span><h3>Escolha seu curso</h3><p>Selecione um curso ou monte um combo com duas ou três opções.</p></article>
+          <article><span>2</span><h3>Preencha seus dados</h3><p>Informe os dados necessários para adiantar sua matrícula.</p></article>
+          <article><span>3</span><h3>Confirme no WhatsApp</h3><p>A secretaria recebe as informações e entra em contato para confirmar.</p></article>
+        </div>
+      </section>
+
+      <section className="enrollment-section" id="matricula">
+        <div className="enrollment-intro">
+          <p className="eyebrow">Pré-matrícula</p>
+          <h2>Comece hoje a transformar seus planos em conquistas.</h2>
+          <p>Preencha os dados ao lado. Ao finalizar, as informações serão enviadas para a secretaria pelo WhatsApp.</p>
+          <div className="contact-box">
+            <small>Ficou com alguma dúvida?</small><strong>Fale com a secretaria</strong>
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${doubtMessage}`} target="_blank" rel="noreferrer">+55 92 99397-7312</a>
+            <div className="contact-socials">
+              <small>Acompanhe a escola</small>
+              <div className="social-links">
+                <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram do Centro de Ensino Shekinah"><InstagramIcon /><span>Instagram</span></a>
+                <a href={FACEBOOK_URL} target="_blank" rel="noreferrer" aria-label="Facebook do Centro de Ensino Shekinah"><FacebookIcon /><span>Facebook</span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form className="enrollment-form" onSubmit={handleSubmit}>
+          <div className="form-heading"><span>Formulário de interesse</span><p>Campos com * são obrigatórios.</p></div>
+          <div className="field-grid">
+            <label className="field full"><span>Nome completo *</span><input name="nome" type="text" autoComplete="name" required placeholder="Digite seu nome completo" /></label>
+            <label className="field"><span>Data de nascimento *</span><input name="nascimento" type="date" required value={birthDate} onChange={(event) => setBirthDate(event.target.value)} /></label>
+            <label className="field"><span>CPF *</span><input name="cpf" type="text" inputMode="numeric" required placeholder="000.000.000-00" /></label>
+            <label className="field"><span>RG *</span><input name="rg" type="text" inputMode="numeric" required placeholder="Digite o número do RG" /></label>
+            <label className="field"><span>Telefone principal *</span><input name="whatsapp" type="tel" autoComplete="tel" required placeholder="(92) 99999-9999" /></label>
+            <label className="field"><span>Segundo telefone (opcional)</span><input name="telefone2" type="tel" placeholder="(92) 99999-9999" /></label>
+            <label className="field full"><span>Endereço completo *</span><input name="endereco" type="text" autoComplete="street-address" required placeholder="Rua, número, bairro ou comunidade" /></label>
+          </div>
+
+          {isMinor && (
+            <div className="minor-fields" aria-live="polite">
+              <div className="minor-heading">
+                <strong>Dados para aluno menor de idade</strong>
+                <p>Como o aluno tem menos de 18 anos, informe os CPFs dos responsáveis.</p>
+              </div>
+              <div className="field-grid">
+                <label className="field"><span>CPF do pai *</span><input name="cpfPai" type="text" inputMode="numeric" required placeholder="000.000.000-00" /></label>
+                <label className="field"><span>CPF da mãe *</span><input name="cpfMae" type="text" inputMode="numeric" required placeholder="000.000.000-00" /></label>
+              </div>
+            </div>
+          )}
+
+          <fieldset className="course-options" id="course-options">
+            <legend>Qual curso você quer fazer? *</legend>
+            <p>Você pode escolher até três cursos participantes. Gestão Empresarial é uma opção individual.</p>
+            <div className="checkbox-grid">
+              {courses.filter((course) => !course.contactOnly).map((course) => (
+                <label className={`course-check${selectedCourses.includes(course.id) ? " selected" : ""}`} key={course.id}>
+                  <input type="checkbox" checked={selectedCourses.includes(course.id)} onChange={() => toggleCourse(course.id)} />
+                  <span>{course.name}</span><small>{course.frequency}</small>
+                </label>
+              ))}
+            </div>
+            {formError && <p className="form-error" role="alert">{formError}</p>}
+          </fieldset>
+
+          <div className="selection-summary" aria-live="polite"><span>{selectedNames.length ? selectedNames.join(" + ") : "Nenhum curso selecionado"}</span><strong>{priceSummary}</strong></div>
+
+          <label className="consent"><input type="checkbox" required /><span>Autorizo o envio destes dados à secretaria da Shekinah para atendimento da minha pré-matrícula. *</span></label>
+          <button className="submit-button" type="submit">Enviar pré-matrícula pelo WhatsApp</button>
+          <p className="privacy-note">Seus dados serão enviados diretamente para o WhatsApp da secretaria e usados somente no atendimento da matrícula.</p>
+        </form>
+      </section>
+
+      <footer>
+        <a className="brand footer-brand" href="#inicio"><span className="brand-mark" aria-hidden="true">S</span><span><strong>Shekinah</strong><small>Centro de Ensino</small></span></a>
+        <div className="footer-socials" aria-label="Redes sociais do Centro de Ensino Shekinah">
+          <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer"><InstagramIcon /><span>Instagram</span></a>
+          <a href={FACEBOOK_URL} target="_blank" rel="noreferrer"><FacebookIcon /><span>Facebook</span></a>
+        </div>
+        <div className="footer-copy"><p>Educando hoje, transformando o amanhã.</p><p>© 2026 Centro de Ensino Shekinah</p></div>
+      </footer>
+
+      <a className="floating-whatsapp" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${doubtMessage}`} target="_blank" rel="noreferrer" aria-label="Tirar dúvidas pelo WhatsApp"><span>WA</span> Tirar dúvidas</a>
+    </main>
+  );
+}

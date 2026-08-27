@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">EJA — Educação de Jovens e Adultos</title>
+  <desc id="desc">Apostilas abertas sobre uma mesa, representando os estudos realizados em casa.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#03142f"/><stop offset="1" stop-color="#0b3b73"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8d36f"/><stop offset="1" stop-color="#e3a520"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity=".3"/></filter>
+  </defs>
+  <rect width="1200" height="700" fill="url(#bg)"/>
+  <circle cx="1050" cy="80" r="250" fill="#f5c451" opacity=".08"/><circle cx="90" cy="650" r="290" fill="#2e79bd" opacity=".11"/>
+  <g opacity=".18" stroke="#f5c451" fill="none"><circle cx="1000" cy="110" r="110"/><circle cx="1000" cy="110" r="155"/><circle cx="1000" cy="110" r="200"/></g>
+  <g transform="translate(600 380)" filter="url(#shadow)">
+    <path d="M-390-105c125-34 253-5 390 75v260c-131-78-262-103-390-65z" fill="#f7f3e8" stroke="#e8ad2e" stroke-width="8"/>
+    <path d="M390-105C265-139 137-110 0-30v260c131-78 262-103 390-65z" fill="#fffdf5" stroke="#e8ad2e" stroke-width="8"/>
+    <path d="M0-30v260" stroke="#c58a12" stroke-width="8"/>
+    <g stroke="#9fa9b8" stroke-width="5" stroke-linecap="round" opacity=".75">
+      <path d="M-330-42c98-17 184 7 265 48"/><path d="M-330 10c98-17 184 7 265 48"/><path d="M-330 62c98-17 184 7 265 48"/><path d="M-330 114c98-17 184 7 265 48"/>
+      <path d="M330-42C232-59 146-35 65 6"/><path d="M330 10C232-7 146 17 65 58"/><path d="M330 62C232 45 146 69 65 110"/><path d="M330 114c-98-17-184 7-265 48"/>
+    </g>
+  </g>
+  <g transform="translate(600 132)"><rect x="-120" y="-58" width="240" height="116" rx="58" fill="url(#gold)"/><text x="0" y="17" text-anchor="middle" fill="#03142f" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="900">EJA</text></g>
+  <text x="600" y="655" text-anchor="middle" fill="#fae5a4" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" letter-spacing="5">APOSTILAS • ESTUDO EM CASA • ORIENTAÇÃO</text>
+</svg>
