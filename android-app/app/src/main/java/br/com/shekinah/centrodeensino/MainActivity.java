@@ -40,6 +40,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        WebView.setWebContentsDebuggingEnabled(false);
+
         webView = findViewById(R.id.web_view);
         progressBar = findViewById(R.id.progress_bar);
         launchPanel = findViewById(R.id.launch_panel);
@@ -50,19 +52,31 @@ public class MainActivity extends Activity {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
-        settings.setDatabaseEnabled(true);
+        settings.setDatabaseEnabled(false);
         settings.setLoadsImagesAutomatically(true);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
+        settings.setAllowFileAccessFromFileURLs(false);
+        settings.setAllowUniversalAccessFromFileURLs(false);
+        settings.setJavaScriptCanOpenWindowsAutomatically(false);
+        settings.setSupportMultipleWindows(false);
+        settings.setGeolocationEnabled(false);
+        settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
-        settings.setUserAgentString(settings.getUserAgentString() + " ShekinahAndroid/1.0");
+        settings.setSaveFormData(false);
+        settings.setUserAgentString(settings.getUserAgentString() + " ShekinahAndroid/1.1");
 
-        CookieManager.getInstance().setAcceptCookie(true);
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            settings.setSafeBrowsingEnabled(true);
+        }
+
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setAcceptThirdPartyCookies(webView, false);
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -90,6 +104,11 @@ public class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return handleNavigation(request.getUrl());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return handleNavigation(Uri.parse(url));
             }
 
             @Override
@@ -123,9 +142,7 @@ public class MainActivity extends Activity {
     }
 
     private boolean handleNavigation(Uri uri) {
-        if (uri == null) {
-            return false;
-        }
+        if (uri == null) return false;
 
         String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
         String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
@@ -146,7 +163,8 @@ public class MainActivity extends Activity {
             return true;
         }
 
-        return false;
+        Toast.makeText(this, R.string.no_app_available, Toast.LENGTH_SHORT).show();
+        return true;
     }
 
     private boolean openIntentUrl(String url) {
@@ -154,6 +172,7 @@ public class MainActivity extends Activity {
             Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
             intent.addCategory(Intent.CATEGORY_BROWSABLE);
             intent.setComponent(null);
+            intent.setSelector(null);
             startActivity(intent);
         } catch (Exception exception) {
             Toast.makeText(this, R.string.no_app_available, Toast.LENGTH_SHORT).show();
@@ -212,6 +231,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onPause() {
+        CookieManager.getInstance().flush();
         webView.onPause();
         super.onPause();
     }
@@ -219,6 +239,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         webView.stopLoading();
+        webView.loadUrl("about:blank");
+        webView.clearHistory();
+        webView.removeAllViews();
         webView.setWebChromeClient(null);
         webView.setWebViewClient(null);
         webView.destroy();
