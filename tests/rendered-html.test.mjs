@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("renders the Shekinah page with EJA and official social links", async () => {
@@ -51,6 +52,10 @@ test("renders the Shekinah page with EJA and official social links", async () =>
   const coursesPosition = html.indexOf('id="cursos"');
   const instagramPosition = html.indexOf("instagram.com/centro_de_ensino_shekinah");
   assert.ok(instagramPosition >= 0 && instagramPosition < coursesPosition, "Instagram e Facebook devem aparecer no começo da página");
+
+  const hardeningCss = await readFile(new URL("../app/site-hardening.css", import.meta.url), "utf8");
+  assert.doesNotMatch(hardeningCss, /background-image:\s*url\(['"]?\/shekinah-shield\.png/i);
+  assert.doesNotMatch(hardeningCss, /\.header-brand-logo\s*\{[^}]*opacity:\s*0\b/is);
 
   const expectedLimits = {
     nome: "100",

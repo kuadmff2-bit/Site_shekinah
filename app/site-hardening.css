@@ -5,18 +5,16 @@
   height: 64px;
   flex: 0 0 72px;
   overflow: visible;
-  background-image: url('/shekinah-shield.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
 }
 
-/* A imagem antiga estava cortada. Mantemos o elemento para o texto alternativo,
-   mas o visual passa a usar o escudo completo. */
+/* Exibe a imagem oficial inteira, sem recorte ou substituição por fundo. */
 .header-brand-logo {
+  display: block;
   width: 100%;
   height: 100%;
-  opacity: 0;
+  object-fit: contain;
+  object-position: center;
+  opacity: 1;
 }
 
 .course-card,
