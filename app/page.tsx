@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useRef, useState } from "react";
 
 type Course = {
   id: string;
@@ -110,8 +110,8 @@ function FacebookIcon() {
   );
 }
 
-function scrollToForm() {
-  document.getElementById("matricula")?.scrollIntoView({ behavior: "smooth" });
+function scrollToCourses() {
+  document.getElementById("cursos")?.scrollIntoView({ behavior: "smooth" });
 }
 
 function formatBirthDate(value: string) {
@@ -181,6 +181,8 @@ export default function Home() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [formError, setFormError] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [isEnrollmentOpen, setEnrollmentOpen] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const isMinor = useMemo(() => {
     const born = parseBirthDate(birthDate);
@@ -241,8 +243,14 @@ export default function Home() {
   }
 
   function chooseCourse(courseId: string) {
+    setFormError("");
     setSelectedCourses([courseId]);
-    scrollToForm();
+    setEnrollmentOpen(true);
+
+    window.setTimeout(() => {
+      document.getElementById("matricula")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      nameInputRef.current?.focus({ preventScroll: true });
+    }, 0);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -302,7 +310,7 @@ export default function Home() {
         <nav aria-label="Navegação principal">
           <a href="#cursos">Cursos</a>
           <a href="#combo">Combo</a>
-          <a className="nav-cta" href="#matricula">Quero me matricular</a>
+          <a className="nav-cta" href="#cursos">Escolher curso</a>
         </nav>
       </header>
 
@@ -315,7 +323,7 @@ export default function Home() {
             <h1>O próximo passo do seu futuro começa aqui.</h1>
             <p className="hero-text">Cursos presenciais, professores qualificados e aprendizado prático para você desenvolver novas habilidades.</p>
             <div className="hero-actions">
-              <button className="button button-gold" type="button" onClick={scrollToForm}>Fazer pré-matrícula</button>
+              <button className="button button-gold" type="button" onClick={scrollToCourses}>Conhecer os cursos</button>
             </div>
             <div className="hero-socials" aria-label="Redes sociais do Centro de Ensino Shekinah">
               <span>Acompanhe a Shekinah</span>
@@ -375,7 +383,15 @@ export default function Home() {
                   Quero saber mais sobre o EJA
                 </a>
               ) : (
-                <button className="course-interest-button" type="button" onClick={() => chooseCourse(course.id)}>Tenho interesse neste curso</button>
+                <button
+                  className="course-interest-button"
+                  type="button"
+                  aria-controls="matricula"
+                  aria-expanded={isEnrollmentOpen}
+                  onClick={() => chooseCourse(course.id)}
+                >
+                  Tenho interesse neste curso
+                </button>
               )}
             </article>
           ))}
@@ -388,7 +404,7 @@ export default function Home() {
             <p className="eyebrow">Combo Shekinah</p>
             <h2>Mais cursos.<br />Mais oportunidades.</h2>
             <p>Escolha <strong>2 cursos por R$ 180</strong> ou <strong>3 cursos por R$ 280</strong> por mês. É mais aprendizado por um valor especial.</p>
-            <button className="button button-gold" type="button" onClick={scrollToForm}>Montar meu combo</button>
+            <button className="button button-gold" type="button" onClick={scrollToCourses}>Escolher cursos do combo</button>
           </div>
           <div className="combo-example combo-choice-list" aria-label="Valores dos combos">
             <div className="combo-total"><small>Combo com 2 cursos</small><strong>R$ 180</strong><span>por mês</span></div>
@@ -398,17 +414,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="enrollment-section" id="matricula">
+      <section className="enrollment-section" id="matricula" hidden={!isEnrollmentOpen} aria-labelledby="matricula-titulo">
         <div className="enrollment-intro">
           <p className="eyebrow">Pré-matrícula</p>
-          <h2>Comece hoje a transformar seus planos em conquistas.</h2>
-          <p>Preencha os dados ao lado. Ao finalizar, as informações serão enviadas para a secretaria pelo WhatsApp.</p>
+          <h2 id="matricula-titulo">Agora preencha seus dados e escolha os cursos.</h2>
+          <p>O curso em que você clicou já está marcado. Você pode adicionar outros e montar seu combo antes de enviar.</p>
         </div>
 
         <form className="enrollment-form" onSubmit={handleSubmit}>
-          <div className="form-heading"><span>Formulário de interesse</span><p>Campos com * são obrigatórios.</p></div>
+          <div className="form-heading"><span>Formulário de interesse</span><p>Preencha os dados e confira os cursos selecionados. Campos com * são obrigatórios.</p></div>
           <div className="field-grid">
-            <label className="field full"><span>Nome completo *</span><input name="nome" type="text" autoComplete="name" required minLength={3} maxLength={100} placeholder="Digite seu nome completo" /><small className="field-hint">Máximo de 100 caracteres.</small></label>
+            <label className="field full"><span>Nome completo *</span><input ref={nameInputRef} name="nome" type="text" autoComplete="name" required minLength={3} maxLength={100} placeholder="Digite seu nome completo" /><small className="field-hint">Máximo de 100 caracteres.</small></label>
             <label className="field">
               <span>Data de nascimento *</span>
               <input
@@ -451,8 +467,8 @@ export default function Home() {
           )}
 
           <fieldset className="course-options" id="course-options">
-            <legend>Qual curso você quer fazer? *</legend>
-            <p>Você pode escolher até três cursos participantes. Gestão Empresarial é uma opção individual.</p>
+            <legend>Quer adicionar mais cursos? *</legend>
+            <p>O primeiro já está marcado. Você pode escolher até três cursos participantes. Gestão Empresarial é uma opção individual.</p>
             <div className="checkbox-grid">
               {courses.filter((course) => !course.contactOnly).map((course) => (
                 <label className={`course-check${selectedCourses.includes(course.id) ? " selected" : ""}`} key={course.id}>

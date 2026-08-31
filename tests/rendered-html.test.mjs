@@ -46,6 +46,14 @@ test("renders the Shekinah page with EJA and official social links", async () =>
   assert.match(html, /src="\/shekinah-shield-mobile\.png"/i);
   assert.match(html, /alt="Escudo do Centro de Ensino Shekinah"/i);
   assert.match(html, /class="course-interest-button"[^>]*>Tenho interesse neste curso/i);
+  const enrollmentSection = html.match(/<section[^>]*id="matricula"[^>]*>/i)?.[0];
+  assert.ok(enrollmentSection, "área de pré-matrícula não encontrada");
+  assert.match(enrollmentSection, /hidden/i, "o formulário deve começar fechado");
+  assert.match(html, /aria-controls="matricula"/i);
+  assert.match(html, /aria-expanded="false"/i);
+  assert.doesNotMatch(html, /href="#matricula"/i);
+  assert.match(html, /O curso em que você clicou já está marcado/i);
+  assert.match(html, /Quer adicionar mais cursos\?/i);
   assert.match(html, /instagram\.com\/centro_de_ensino_shekinah/i);
   assert.match(html, /facebook\.com\/profile\.php\?id=100093706818098/i);
 
@@ -56,6 +64,9 @@ test("renders the Shekinah page with EJA and official social links", async () =>
   const hardeningCss = await readFile(new URL("../app/site-hardening.css", import.meta.url), "utf8");
   assert.doesNotMatch(hardeningCss, /background-image:\s*url\(['"]?\/shekinah-shield\.png/i);
   assert.doesNotMatch(hardeningCss, /\.header-brand-logo\s*\{[^}]*opacity:\s*0\b/is);
+
+  const globalsCss = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(globalsCss, /\.enrollment-section\[hidden\]\s*\{[^}]*display:\s*none\s*!important/is);
 
   const expectedLimits = {
     nome: "100",
