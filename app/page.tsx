@@ -296,9 +296,8 @@ export default function Home() {
       <div className="announcement"><span>✦</span> Matrículas abertas • início imediato <span>✦</span></div>
 
       <header className="site-header">
-        <a className="brand" href="#inicio" aria-label="Centro de Ensino Shekinah - início">
-          <span className="brand-mark" aria-hidden="true">S</span>
-          <span><strong>Shekinah</strong><small>Centro de Ensino</small></span>
+        <a className="header-brand" href="#inicio" aria-label="Centro de Ensino Shekinah - início">
+          <img className="header-brand-logo" src="/shekinah-logo.png" alt="Centro de Ensino Shekinah" width="197" height="95" />
         </a>
         <nav aria-label="Navegação principal">
           <a href="#cursos">Cursos</a>
