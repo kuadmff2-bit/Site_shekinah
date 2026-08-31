@@ -1,0 +1,84 @@
+/* Ajustes de identidade, desempenho percebido e acessibilidade. */
+
+.header-brand {
+  width: 72px;
+  height: 64px;
+  flex: 0 0 72px;
+  overflow: visible;
+  background-image: url('/shekinah-shield.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* A imagem antiga estava cortada. Mantemos o elemento para o texto alternativo,
+   mas o visual passa a usar o escudo completo. */
+.header-brand-logo {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.course-card,
+.combo-section,
+.enrollment-section,
+footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 650px;
+}
+
+.cookie-consent {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  z-index: 80;
+  display: flex;
+  width: min(760px, calc(100% - 36px));
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin: 0 auto;
+  padding: 18px 20px;
+  border: 1px solid rgba(245, 196, 81, .42);
+  border-radius: 16px;
+  background: #061d43;
+  color: white;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, .3);
+}
+
+.cookie-consent strong { display: block; color: #f5c451; font-size: 14px; }
+.cookie-consent p { max-width: 520px; margin: 5px 0 0; color: #d9e4f1; font-size: 12px; line-height: 1.55; }
+.cookie-consent-actions { display: flex; flex: 0 0 auto; gap: 9px; }
+.cookie-consent button { min-height: 42px; padding: 9px 15px; border-radius: 9px; cursor: pointer; font-size: 12px; font-weight: 800; }
+.cookie-primary { border: 1px solid #f5c451; background: #f5c451; color: #03142f; }
+.cookie-secondary { border: 1px solid rgba(255,255,255,.28); background: transparent; color: white; }
+
+.not-found-page {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: 28px;
+  background: #03142f;
+  color: white;
+  text-align: center;
+}
+.not-found-card { width: min(560px, 100%); }
+.not-found-logo { display: block; width: 88px; height: 88px; object-fit: contain; margin: 0 auto 20px; }
+.not-found-page small { color: #f5c451; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+.not-found-page h1 { margin: 12px 0; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(40px, 8vw, 68px); }
+.not-found-page p { margin: 0 auto 25px; color: #d6e2f0; line-height: 1.65; }
+.not-found-page a { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; padding: 12px 20px; border-radius: 10px; background: #f5c451; color: #03142f; font-weight: 900; }
+
+@media (max-width: 760px) {
+  .site-header { min-height: 72px; }
+  .header-brand { width: 60px; height: 56px; flex-basis: 60px; }
+  .cookie-consent { align-items: stretch; flex-direction: column; gap: 14px; }
+  .cookie-consent-actions { width: 100%; }
+  .cookie-consent-actions button { flex: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
