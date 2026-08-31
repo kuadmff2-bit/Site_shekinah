@@ -297,7 +297,7 @@ export default function Home() {
 
       <header className="site-header">
         <a className="header-brand" href="#inicio" aria-label="Centro de Ensino Shekinah - início">
-          <img className="header-brand-logo" src="/shekinah-logo.png" alt="Escudo do Centro de Ensino Shekinah" width="54" height="64" />
+          <img className="header-brand-logo" src="/shekinah-shield.png" alt="Escudo do Centro de Ensino Shekinah" width="64" height="64" />
         </a>
         <nav aria-label="Navegação principal">
           <a href="#cursos">Cursos</a>
