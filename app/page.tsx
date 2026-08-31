@@ -84,7 +84,7 @@ const courses: Course[] = [
     name: "EJA — Educação de Jovens e Adultos",
     description: "Você recebe as apostilas para estudar em casa e, todo fim de semana, vem à nossa instituição fazer uma prova relacionada ao conteúdo da apostila estudada.",
     frequency: "Prova presencial todo fim de semana",
-    price: "Fale com a secretaria",
+    price: "Informações no WhatsApp",
     priceLabel: "Como participar",
     badge: "Estude em casa",
     featured: true,
@@ -119,6 +119,45 @@ function formatBirthDate(value: string) {
   if (digits.length <= 2) return digits;
   if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+function formatCpf(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  return digits
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1-$2");
+}
+
+function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : "";
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+function handleCpfInput(event: FormEvent<HTMLInputElement>) {
+  const input = event.currentTarget;
+  input.value = formatCpf(input.value);
+  input.setCustomValidity(
+    input.value.length > 0 && input.value.length < 14
+      ? "Digite os 11 números do CPF."
+      : "",
+  );
+}
+
+function handlePhoneInput(event: FormEvent<HTMLInputElement>) {
+  const input = event.currentTarget;
+  input.value = formatPhone(input.value);
+  const digitCount = input.value.replace(/\D/g, "").length;
+  input.setCustomValidity(
+    digitCount > 0 && digitCount < 10
+      ? "Digite o telefone com DDD."
+      : "",
+  );
 }
 
 function parseBirthDate(value: string) {
@@ -264,7 +303,6 @@ export default function Home() {
         <nav aria-label="Navegação principal">
           <a href="#cursos">Cursos</a>
           <a href="#combo">Combo</a>
-          <a href="#como-funciona">Como funciona</a>
           <a className="nav-cta" href="#matricula">Quero me matricular</a>
         </nav>
       </header>
@@ -279,7 +317,13 @@ export default function Home() {
             <p className="hero-text">Cursos presenciais, professores qualificados e aprendizado prático para você desenvolver novas habilidades.</p>
             <div className="hero-actions">
               <button className="button button-gold" type="button" onClick={scrollToForm}>Fazer pré-matrícula</button>
-              <a className="button button-outline" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${doubtMessage}`} target="_blank" rel="noreferrer">Falar com a secretaria</a>
+            </div>
+            <div className="hero-socials" aria-label="Redes sociais do Centro de Ensino Shekinah">
+              <span>Acompanhe a Shekinah</span>
+              <div className="social-links">
+                <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram do Centro de Ensino Shekinah"><InstagramIcon /><span>Instagram</span></a>
+                <a href={FACEBOOK_URL} target="_blank" rel="noreferrer" aria-label="Facebook do Centro de Ensino Shekinah"><FacebookIcon /><span>Facebook</span></a>
+              </div>
             </div>
             <div className="hero-trust" aria-label="Diferenciais">
               <span>✓ Aulas presenciais</span><span>✓ Certificado</span><span>✓ Início imediato</span>
@@ -328,11 +372,11 @@ export default function Home() {
                 <span><small>{course.priceLabel ?? "Mensalidade"}</small>{course.price}</span>
               </div>
               {course.contactOnly ? (
-                <a className="course-contact-link" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${ejaMessage}`} target="_blank" rel="noreferrer">
-                  Conversar sobre o EJA
+                <a className="course-interest-button" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${ejaMessage}`} target="_blank" rel="noreferrer">
+                  Quero saber mais sobre o EJA
                 </a>
               ) : (
-                <button type="button" onClick={() => chooseCourse(course.id)}>Tenho interesse</button>
+                <button className="course-interest-button" type="button" onClick={() => chooseCourse(course.id)}>Tenho interesse neste curso</button>
               )}
             </article>
           ))}
@@ -355,37 +399,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section steps-section" id="como-funciona">
-        <div className="section-heading centered"><p className="eyebrow dark">Simples e rápido</p><h2>Sua matrícula em três passos</h2></div>
-        <div className="steps-grid">
-          <article><span>1</span><h3>Escolha seu curso</h3><p>Selecione um curso ou monte um combo com duas ou três opções.</p></article>
-          <article><span>2</span><h3>Preencha seus dados</h3><p>Informe os dados necessários para adiantar sua matrícula.</p></article>
-          <article><span>3</span><h3>Confirme no WhatsApp</h3><p>A secretaria recebe as informações e entra em contato para confirmar.</p></article>
-        </div>
-      </section>
-
       <section className="enrollment-section" id="matricula">
         <div className="enrollment-intro">
           <p className="eyebrow">Pré-matrícula</p>
           <h2>Comece hoje a transformar seus planos em conquistas.</h2>
           <p>Preencha os dados ao lado. Ao finalizar, as informações serão enviadas para a secretaria pelo WhatsApp.</p>
-          <div className="contact-box">
-            <small>Ficou com alguma dúvida?</small><strong>Fale com a secretaria</strong>
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${doubtMessage}`} target="_blank" rel="noreferrer">+55 92 99397-7312</a>
-            <div className="contact-socials">
-              <small>Acompanhe a escola</small>
-              <div className="social-links">
-                <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram do Centro de Ensino Shekinah"><InstagramIcon /><span>Instagram</span></a>
-                <a href={FACEBOOK_URL} target="_blank" rel="noreferrer" aria-label="Facebook do Centro de Ensino Shekinah"><FacebookIcon /><span>Facebook</span></a>
-              </div>
-            </div>
-          </div>
         </div>
 
         <form className="enrollment-form" onSubmit={handleSubmit}>
           <div className="form-heading"><span>Formulário de interesse</span><p>Campos com * são obrigatórios.</p></div>
           <div className="field-grid">
-            <label className="field full"><span>Nome completo *</span><input name="nome" type="text" autoComplete="name" required placeholder="Digite seu nome completo" /></label>
+            <label className="field full"><span>Nome completo *</span><input name="nome" type="text" autoComplete="name" required minLength={3} maxLength={100} placeholder="Digite seu nome completo" /><small className="field-hint">Máximo de 100 caracteres.</small></label>
             <label className="field">
               <span>Data de nascimento *</span>
               <input
@@ -403,15 +427,15 @@ export default function Home() {
               />
               <small className="field-hint">Digite o dia, o mês e o ano. As barras aparecem automaticamente.</small>
             </label>
-            <label className="field"><span>CPF *</span><input name="cpf" type="text" inputMode="numeric" required placeholder="000.000.000-00" /></label>
+            <label className="field"><span>CPF *</span><input name="cpf" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
             <label className="field">
               <span>RG ou nova Carteira de Identidade Nacional (CIN) *</span>
-              <input name="rg" type="text" inputMode="numeric" required placeholder="RG antigo ou o mesmo número do CPF" />
+              <input name="rg" type="text" required minLength={5} maxLength={20} placeholder="RG antigo ou o mesmo número do CPF" />
               <small className="field-hint">Na nova identidade, o número informado pode ser o mesmo do CPF.</small>
             </label>
-            <label className="field"><span>Telefone principal *</span><input name="whatsapp" type="tel" autoComplete="tel" required placeholder="(92) 99999-9999" /></label>
-            <label className="field"><span>Segundo telefone (opcional)</span><input name="telefone2" type="tel" placeholder="(92) 99999-9999" /></label>
-            <label className="field full"><span>Endereço completo *</span><input name="endereco" type="text" autoComplete="street-address" required placeholder="Rua, número, bairro ou comunidade" /></label>
+            <label className="field"><span>Telefone principal *</span><input name="whatsapp" type="tel" inputMode="numeric" autoComplete="tel" required minLength={14} maxLength={15} pattern="[(][0-9]{2}[)] [0-9]{4,5}-[0-9]{4}" title="Digite o telefone com DDD" placeholder="(92) 99999-9999" onInput={handlePhoneInput} /></label>
+            <label className="field"><span>Segundo telefone (opcional)</span><input name="telefone2" type="tel" inputMode="numeric" maxLength={15} pattern="[(][0-9]{2}[)] [0-9]{4,5}-[0-9]{4}" title="Digite o telefone com DDD" placeholder="(92) 99999-9999" onInput={handlePhoneInput} /></label>
+            <label className="field full"><span>Endereço completo *</span><input name="endereco" type="text" autoComplete="street-address" required minLength={5} maxLength={180} placeholder="Rua, número, bairro ou comunidade" /><small className="field-hint">Máximo de 180 caracteres.</small></label>
           </div>
 
           {isMinor && (
@@ -421,8 +445,8 @@ export default function Home() {
                 <p>Como o aluno tem menos de 18 anos, informe os CPFs dos responsáveis.</p>
               </div>
               <div className="field-grid">
-                <label className="field"><span>CPF do pai *</span><input name="cpfPai" type="text" inputMode="numeric" required placeholder="000.000.000-00" /></label>
-                <label className="field"><span>CPF da mãe *</span><input name="cpfMae" type="text" inputMode="numeric" required placeholder="000.000.000-00" /></label>
+                <label className="field"><span>CPF do pai *</span><input name="cpfPai" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
+                <label className="field"><span>CPF da mãe *</span><input name="cpfMae" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
               </div>
             </div>
           )}
@@ -451,10 +475,6 @@ export default function Home() {
 
       <footer>
         <a className="brand footer-brand" href="#inicio"><span className="brand-mark" aria-hidden="true">S</span><span><strong>Shekinah</strong><small>Centro de Ensino</small></span></a>
-        <div className="footer-socials" aria-label="Redes sociais do Centro de Ensino Shekinah">
-          <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer"><InstagramIcon /><span>Instagram</span></a>
-          <a href={FACEBOOK_URL} target="_blank" rel="noreferrer"><FacebookIcon /><span>Facebook</span></a>
-        </div>
         <div className="footer-copy"><p>Educando hoje, transformando o amanhã.</p><p>© 2026 Centro de Ensino Shekinah</p></div>
       </footer>
 
