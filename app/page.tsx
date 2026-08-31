@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type Course = {
   id: string;
@@ -182,7 +182,30 @@ export default function Home() {
   const [formError, setFormError] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [isEnrollmentOpen, setEnrollmentOpen] = useState(false);
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const interestButtonRef = useRef<HTMLButtonElement>(null);
+
+  function closeEnrollment() {
+    setEnrollmentOpen(false);
+    window.setTimeout(() => interestButtonRef.current?.focus(), 0);
+  }
+
+  useEffect(() => {
+    if (!isEnrollmentOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") closeEnrollment();
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [isEnrollmentOpen]);
 
   const isMinor = useMemo(() => {
     const born = parseBirthDate(birthDate);
@@ -242,14 +265,14 @@ export default function Home() {
     });
   }
 
-  function chooseCourse(courseId: string) {
+  function chooseCourse(courseId: string, trigger: HTMLButtonElement) {
+    interestButtonRef.current = trigger;
     setFormError("");
     setSelectedCourses([courseId]);
     setEnrollmentOpen(true);
 
     window.setTimeout(() => {
-      document.getElementById("matricula")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      nameInputRef.current?.focus({ preventScroll: true });
+      dialogRef.current?.focus();
     }, 0);
   }
 
@@ -386,9 +409,9 @@ export default function Home() {
                 <button
                   className="course-interest-button"
                   type="button"
-                  aria-controls="matricula"
+                  aria-controls="matricula-modal"
                   aria-expanded={isEnrollmentOpen}
-                  onClick={() => chooseCourse(course.id)}
+                  onClick={(event) => chooseCourse(course.id, event.currentTarget)}
                 >
                   Tenho interesse neste curso
                 </button>
@@ -414,79 +437,103 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="enrollment-section" id="matricula" hidden={!isEnrollmentOpen} aria-labelledby="matricula-titulo">
-        <div className="enrollment-intro">
-          <p className="eyebrow">Pré-matrícula</p>
-          <h2 id="matricula-titulo">Agora preencha seus dados e escolha os cursos.</h2>
-          <p>O curso em que você clicou já está marcado. Você pode adicionar outros e montar seu combo antes de enviar.</p>
-        </div>
+      {isEnrollmentOpen && (
+        <div
+          className="enrollment-modal-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeEnrollment();
+          }}
+        >
+          <section
+            className="enrollment-modal-panel"
+            id="matricula-modal"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="matricula-titulo"
+            aria-describedby="matricula-descricao"
+            tabIndex={-1}
+          >
+            <button className="modal-close" type="button" onClick={closeEnrollment} aria-label="Fechar formulário de interesse">
+              <span aria-hidden="true">×</span> Fechar
+            </button>
 
-        <form className="enrollment-form" onSubmit={handleSubmit}>
-          <div className="form-heading"><span>Formulário de interesse</span><p>Preencha os dados e confira os cursos selecionados. Campos com * são obrigatórios.</p></div>
-          <div className="field-grid">
-            <label className="field full"><span>Nome completo *</span><input ref={nameInputRef} name="nome" type="text" autoComplete="name" required minLength={3} maxLength={100} placeholder="Digite seu nome completo" /><small className="field-hint">Máximo de 100 caracteres.</small></label>
-            <label className="field">
-              <span>Data de nascimento *</span>
-              <input
-                name="nascimento"
-                type="text"
-                inputMode="numeric"
-                autoComplete="bday"
-                required
-                maxLength={10}
-                pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
-                title="Digite a data no formato DD/MM/AAAA"
-                placeholder="DD/MM/AAAA"
-                value={birthDate}
-                onChange={handleBirthDateChange}
-              />
-              <small className="field-hint">Digite o dia, o mês e o ano. As barras aparecem automaticamente.</small>
-            </label>
-            <label className="field"><span>CPF *</span><input name="cpf" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
-            <label className="field">
-              <span>RG ou nova Carteira de Identidade Nacional (CIN) *</span>
-              <input name="rg" type="text" required minLength={5} maxLength={20} placeholder="RG antigo ou o mesmo número do CPF" />
-              <small className="field-hint">Na nova identidade, o número informado pode ser o mesmo do CPF.</small>
-            </label>
-            <label className="field"><span>Telefone principal *</span><input name="whatsapp" type="tel" inputMode="numeric" autoComplete="tel" required minLength={14} maxLength={15} pattern="[(][0-9]{2}[)] [0-9]{4,5}-[0-9]{4}" title="Digite o telefone com DDD" placeholder="(92) 99999-9999" onInput={handlePhoneInput} /></label>
-            <label className="field"><span>Segundo telefone (opcional)</span><input name="telefone2" type="tel" inputMode="numeric" maxLength={15} pattern="[(][0-9]{2}[)] [0-9]{4,5}-[0-9]{4}" title="Digite o telefone com DDD" placeholder="(92) 99999-9999" onInput={handlePhoneInput} /></label>
-            <label className="field full"><span>Endereço completo *</span><input name="endereco" type="text" autoComplete="street-address" required minLength={5} maxLength={180} placeholder="Rua, número, bairro ou comunidade" /><small className="field-hint">Máximo de 180 caracteres.</small></label>
-          </div>
+            <div className="enrollment-intro">
+              <p className="eyebrow">Pré-matrícula</p>
+              <h2 id="matricula-titulo">Escolha seus cursos e preencha os dados.</h2>
+              <p id="matricula-descricao">O curso em que você clicou já está marcado. Você pode adicionar outros e montar seu combo antes de enviar.</p>
+            </div>
 
-          {isMinor && (
-            <div className="minor-fields" aria-live="polite">
-              <div className="minor-heading">
-                <strong>Dados para aluno menor de idade</strong>
-                <p>Como o aluno tem menos de 18 anos, informe os CPFs dos responsáveis.</p>
-              </div>
+            <form className="enrollment-form" onSubmit={handleSubmit}>
+              <div className="form-heading"><span>Seu interesse</span><p>Confira o curso escolhido e adicione outras opções se desejar.</p></div>
+
+              <fieldset className="course-options" id="course-options">
+                <legend>Curso escolhido e outras opções</legend>
+                <p>Você pode escolher até três cursos participantes. Gestão Empresarial é uma opção individual.</p>
+                <div className="checkbox-grid">
+                  {courses.filter((course) => !course.contactOnly).map((course) => (
+                    <label className={`course-check${selectedCourses.includes(course.id) ? " selected" : ""}`} key={course.id}>
+                      <input type="checkbox" checked={selectedCourses.includes(course.id)} onChange={() => toggleCourse(course.id)} />
+                      <span>{course.name}</span><small>{course.frequency}</small>
+                    </label>
+                  ))}
+                </div>
+                {formError && <p className="form-error" role="alert">{formError}</p>}
+              </fieldset>
+
+              <div className="selection-summary" aria-live="polite"><span>{selectedNames.length ? selectedNames.join(" + ") : "Nenhum curso selecionado"}</span><strong>{priceSummary}</strong></div>
+
+              <div className="form-data-heading"><strong>Agora preencha seus dados</strong><span>Campos com * são obrigatórios.</span></div>
               <div className="field-grid">
-                <label className="field"><span>CPF do pai *</span><input name="cpfPai" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
-                <label className="field"><span>CPF da mãe *</span><input name="cpfMae" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
-              </div>
-            </div>
-          )}
-
-          <fieldset className="course-options" id="course-options">
-            <legend>Quer adicionar mais cursos? *</legend>
-            <p>O primeiro já está marcado. Você pode escolher até três cursos participantes. Gestão Empresarial é uma opção individual.</p>
-            <div className="checkbox-grid">
-              {courses.filter((course) => !course.contactOnly).map((course) => (
-                <label className={`course-check${selectedCourses.includes(course.id) ? " selected" : ""}`} key={course.id}>
-                  <input type="checkbox" checked={selectedCourses.includes(course.id)} onChange={() => toggleCourse(course.id)} />
-                  <span>{course.name}</span><small>{course.frequency}</small>
+                <label className="field full"><span>Nome completo *</span><input name="nome" type="text" autoComplete="name" required minLength={3} maxLength={100} placeholder="Digite seu nome completo" /><small className="field-hint">Máximo de 100 caracteres.</small></label>
+                <label className="field">
+                  <span>Data de nascimento *</span>
+                  <input
+                    name="nascimento"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="bday"
+                    required
+                    maxLength={10}
+                    pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}"
+                    title="Digite a data no formato DD/MM/AAAA"
+                    placeholder="DD/MM/AAAA"
+                    value={birthDate}
+                    onChange={handleBirthDateChange}
+                  />
+                  <small className="field-hint">Digite o dia, o mês e o ano. As barras aparecem automaticamente.</small>
                 </label>
-              ))}
-            </div>
-            {formError && <p className="form-error" role="alert">{formError}</p>}
-          </fieldset>
+                <label className="field"><span>CPF *</span><input name="cpf" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
+                <label className="field">
+                  <span>RG ou nova Carteira de Identidade Nacional (CIN) *</span>
+                  <input name="rg" type="text" required minLength={5} maxLength={20} placeholder="RG antigo ou o mesmo número do CPF" />
+                  <small className="field-hint">Na nova identidade, o número informado pode ser o mesmo do CPF.</small>
+                </label>
+                <label className="field"><span>Telefone principal *</span><input name="whatsapp" type="tel" inputMode="numeric" autoComplete="tel" required minLength={14} maxLength={15} pattern="[(][0-9]{2}[)] [0-9]{4,5}-[0-9]{4}" title="Digite o telefone com DDD" placeholder="(92) 99999-9999" onInput={handlePhoneInput} /></label>
+                <label className="field"><span>Segundo telefone (opcional)</span><input name="telefone2" type="tel" inputMode="numeric" maxLength={15} pattern="[(][0-9]{2}[)] [0-9]{4,5}-[0-9]{4}" title="Digite o telefone com DDD" placeholder="(92) 99999-9999" onInput={handlePhoneInput} /></label>
+                <label className="field full"><span>Endereço completo *</span><input name="endereco" type="text" autoComplete="street-address" required minLength={5} maxLength={180} placeholder="Rua, número, bairro ou comunidade" /><small className="field-hint">Máximo de 180 caracteres.</small></label>
+              </div>
 
-          <div className="selection-summary" aria-live="polite"><span>{selectedNames.length ? selectedNames.join(" + ") : "Nenhum curso selecionado"}</span><strong>{priceSummary}</strong></div>
+              {isMinor && (
+                <div className="minor-fields" aria-live="polite">
+                  <div className="minor-heading">
+                    <strong>Dados para aluno menor de idade</strong>
+                    <p>Como o aluno tem menos de 18 anos, informe os CPFs dos responsáveis.</p>
+                  </div>
+                  <div className="field-grid">
+                    <label className="field"><span>CPF do pai *</span><input name="cpfPai" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
+                    <label className="field"><span>CPF da mãe *</span><input name="cpfMae" type="text" inputMode="numeric" required minLength={14} maxLength={14} pattern="[0-9]{3}[.][0-9]{3}[.][0-9]{3}-[0-9]{2}" title="Digite os 11 números do CPF" placeholder="000.000.000-00" onInput={handleCpfInput} /></label>
+                  </div>
+                </div>
+              )}
 
-          <label className="consent"><input type="checkbox" required /><span>Autorizo o envio destes dados à secretaria da Shekinah para atendimento da minha pré-matrícula. *</span></label>
-          <button className="submit-button" type="submit">Enviar pré-matrícula pelo WhatsApp</button>
-          <p className="privacy-note">Seus dados serão enviados diretamente para o WhatsApp da secretaria e usados somente no atendimento da matrícula.</p>
-        </form>
-      </section>
+              <label className="consent"><input type="checkbox" required /><span>Autorizo o envio destes dados à secretaria da Shekinah para atendimento da minha pré-matrícula. *</span></label>
+              <button className="submit-button" type="submit">Enviar pré-matrícula pelo WhatsApp</button>
+              <p className="privacy-note">Seus dados serão enviados diretamente para o WhatsApp da secretaria e usados somente no atendimento da matrícula.</p>
+            </form>
+          </section>
+        </div>
+      )}
 
       <footer>
         <a className="brand footer-brand" href="#inicio"><span className="brand-mark" aria-hidden="true">S</span><span><strong>Shekinah</strong><small>Centro de Ensino</small></span></a>

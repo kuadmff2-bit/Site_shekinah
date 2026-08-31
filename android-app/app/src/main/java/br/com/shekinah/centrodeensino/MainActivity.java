@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setSaveFormData(false);
-        settings.setUserAgentString(settings.getUserAgentString() + " ShekinahAndroid/1.2");
+        settings.setUserAgentString(settings.getUserAgentString() + " ShekinahAndroid/1.3");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             settings.setSafeBrowsingEnabled(true);
