@@ -1,0 +1,48 @@
+name: Validar site da Shekinah
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - "public/**"
+      - "tests/**"
+      - "next.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/validar-site.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "public/**"
+      - "tests/**"
+      - "next.config.ts"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v6
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Verificar código
+        run: npm run lint
+
+      - name: Compilar e testar
+        run: npm test
