@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import AnalyticsConsent from "./analytics-consent";
+import FooterContact from "./footer-contact";
 import "./globals.css";
 import "./site-hardening.css";
+import "./footer-legal.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://site-shekinah.kuadmff2.workers.dev";
 
@@ -76,6 +78,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="pt-BR">
       <body>
         {children}
+        <FooterContact />
         <AnalyticsConsent />
       </body>
     </html>
