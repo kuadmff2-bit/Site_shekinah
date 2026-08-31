@@ -46,6 +46,8 @@ test("renders the Shekinah page with EJA and official social links", async () =>
   assert.doesNotMatch(html, /Fale com a secretaria/i);
   assert.match(html, /src="\/shekinah-shield-mobile\.png"/i);
   assert.match(html, /alt="Escudo do Centro de Ensino Shekinah"/i);
+  assert.match(html, /href="[^"\s]*\/favicon-shekinah-v2\.png"/i);
+  assert.doesNotMatch(html, /href="[^"\s]*\/favicon\.svg"/i);
   assert.match(html, /class="course-interest-button"[^>]*>Tenho interesse neste curso/i);
   assert.doesNotMatch(html, /id="matricula-modal"/i, "a janela não deve existir antes do clique");
   assert.doesNotMatch(html, /name="nome"/i, "o formulário não deve aparecer no corpo da página");

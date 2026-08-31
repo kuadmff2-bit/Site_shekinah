@@ -66,9 +66,9 @@ export const metadata: Metadata = {
     images: ["/og.png"],
   },
   icons: {
-    icon: [{ url: "/shekinah-shield.png", type: "image/png" }],
-    shortcut: "/shekinah-shield.png",
-    apple: "/shekinah-shield.png",
+    icon: [{ url: "/favicon-shekinah-v2.png", sizes: "96x96", type: "image/png" }],
+    shortcut: "/favicon-shekinah-v2.png",
+    apple: [{ url: "/shekinah-shield.png", sizes: "512x512", type: "image/png" }],
   },
   manifest: "/manifest.webmanifest",
 };
