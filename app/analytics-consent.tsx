@@ -10,19 +10,20 @@ type Consent = "accepted" | "rejected" | null;
 
 export default function AnalyticsConsent() {
   const [consent, setConsent] = useState<Consent>(null);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(!GA_ID);
 
   useEffect(() => {
-    if (!GA_ID) {
-      setReady(true);
-      return;
-    }
+    if (!GA_ID) return;
 
-    const saved = window.localStorage.getItem(CONSENT_KEY);
-    if (saved === "accepted" || saved === "rejected") {
-      setConsent(saved);
-    }
-    setReady(true);
+    const timer = window.setTimeout(() => {
+      const saved = window.localStorage.getItem(CONSENT_KEY);
+      if (saved === "accepted" || saved === "rejected") {
+        setConsent(saved);
+      }
+      setReady(true);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   function saveConsent(value: Exclude<Consent, null>) {
