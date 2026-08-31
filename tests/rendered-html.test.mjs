@@ -43,7 +43,7 @@ test("renders the Shekinah page with EJA and official social links", async () =>
   assert.doesNotMatch(html, /id="como-funciona"/i);
   assert.doesNotMatch(html, /Fale com a secretaria/i);
   assert.match(html, /src="\/shekinah-logo\.png"/i);
-  assert.match(html, /alt="Centro de Ensino Shekinah"/i);
+  assert.match(html, /alt="Escudo do Centro de Ensino Shekinah"/i);
   assert.match(html, /class="course-interest-button"[^>]*>Tenho interesse neste curso/i);
   assert.match(html, /instagram\.com\/centro_de_ensino_shekinah/i);
   assert.match(html, /facebook\.com\/profile\.php\?id=100093706818098/i);
